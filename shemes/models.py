@@ -43,4 +43,4 @@ order_lines = Table('order_lines', metadata,
     Column('quantity', Integer())
 )
 
-metadata.create_all(settings.engine)  # создаем таблицы в Б
+metadata.create_all(settings.engine)  # создаем таблицы в БД
