@@ -1,4 +1,4 @@
-from sqlalchemy import insert
+from sqlalchemy import insert, and_, or_, not_, asc, desc
 from sqlalchemy import select
 from settings.settings import conn
 from shemes.models import customers, items, orders, order_lines
@@ -202,7 +202,7 @@ from shemes.models import customers, items, orders, order_lines
 
 
 ########################
-# Пример запроса на выборку данных из БД, условии для фильрации
+# Пример запроса на выборку данных из БД, условии для фильрации  ORM
 
 # Запрос вернет все элементы, цена которых выше 20.
 # s = select([items]).where(items.c.cost_price > 20)  # тут мы фильтруем items по полю cost_price и выбираем только те записи, где значение поля cost_price больше 20
@@ -212,7 +212,161 @@ from shemes.models import customers, items, orders, order_lines
 
 
 # Дополнительные условия можно задать, просто добавив несколько вызовов метода where()
-s = select([items]).where(items.c.cost_price + items.c.selling_price > 50).where(items.c.quantity > 10)
-r = conn.execute(s)
-print(s)
-print(r.fetcall())
+# s = select([items]).where(items.c.cost_price + items.c.selling_price > 50).where(items.c.quantity > 10)
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Вывод данных из БД изаользуя bool оператор "|" --> OR
+# s = select([items]).where((items.c.cost_price > 200) | (items.c.quantity < 5))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Вывод данных из БД изаользуя bool оператор "~" --> NOT =!
+# s = select([items]).where(~(items.c.quantity == 50))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Вывод данных из БД изаользуя bool оператор "~" --> NOT =! и оператор "&" --> AND
+# s = select([items]).where(~(items.c.quantity == 50) & (items.c.cost_price < 20))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+##############################################
+# Союзы в SQLAlchemy
+# Условия можно объединять и с помощью функций-союзов and_(), or_() и not_(). Это предпочтительный способ добавления условий в SQLAlchemy.
+
+#  если пред звапросом есть союз and_(items.c.quantity >= 50, items.c.cost_price < 100), то все перечисленные условия внутри союза and_()
+#  переведутся на where(items.c.quantity >= 50 & items.c.cost_price < 100)  & --> AND
+# s = select([items]).where(and_(items.c.quantity >= 50, items.c.cost_price < 100,))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+#  если пред звапросом есть союз or_(items.c.quantity >= 50, items.c.cost_price < 100), то все перечисленные условия внутри союза and_()
+#  переведутся на where(items.c.quantity >= 50 | items.c.cost_price < 100)  | --> OR
+# s = select([items]).where(or_(items.c.quantity >= 50, items.c.cost_price < 100, ))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+#  если пред звапросом есть союз and_(items.c.quantity >= 50, items.c.cost_price < 100, not_(items.c.name == 'Headphone')), и внутри союза and_() есть союз not_()
+#  то все перечисленные условия внутри союза and_() переведутся на where(items.c.quantity >= 50 & items.c.cost_price < 100 & ~(items.c.name == 'Headphone'))
+# WHERE items.quantity >= :quantity_1 AND items.cost_price < :cost_price_1 AND items.name != :name_1
+# s = select([items]).where(and_(items.c.quantity >= 50, items.c.cost_price < 100, not_(items.c.name == 'Headphone')))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# проверка на пустоту значения date_chipped
+# WHERE orders.date_shipped IS NULL
+# s = select([orders]).where(orders.c.date_shipped == None)
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# проверка на непустоту значения date_chipped
+# WHERE orders.date_shipped IS NOT NULL
+# s = select([orders]).where(orders.c.date_shipped != None)
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# проерка на полю first_name и есть ли first_name в перечисленном списке
+# WHERE orders.first_name IN ('Valeriy', 'Vadim')
+# s = select([customers]).where(customers.c.first_name.in_(["Valeriy", "Vadim"]))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+# проерка на полю first_name и нет ли first_name в перечисленном списке, то есть зять все что не похожиж в списке
+# WHERE orders.first_name NOT IN ('Valeriy', 'Vadim')
+# s = select([customers]).where(customers.c.first_name.notin_(["Valeriy", "Vadim"]))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+# between проверка в промежудке, это как в джанго __range()
+# s = select([items]).where(items.c.cost_price.between(10, 20))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# not_ и between проверка на, не в промежудке
+# WHERE items.cost_price NOT BETWEEN %(cost_price_1)s AND %(cost_price_2)s
+# s = select([items]).where(not_(items.c.cost_price.between(10, 20)))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Метод like() выполняет сравнение с учетом регистра.
+# s = select([items]).where(items.c.name.like("Wa%"))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Метод ilike() выполняет сравнение без учетом регистра.
+# s = select([items]).where(items.c.name.ilike("wa%"))
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Сортировка order_by(), а метод asc и desc выполняет сортировку по возрастанию и убыванию по полю.
+# s = select([items]).where(items.c.quantity > 10).order_by(asc(items.c.cost_price))
+# s = select([items]).where(items.c.quantity > 10).order_by(desc(items.c.cost_price))
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Метод limit() принимает целое число, определяющее число записей, которые должны вернуться
+# FROM items ORDER BY items.quantity LIMIT %(param_1)s
+# s = select([items]).order_by(items.c.quantity).limit(2)
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# offset(n) метод овсет выбирает каждый n элемент из списка
+# s = select([items]).order_by(items.c.quantity).limit(5).offset(2)
+# print(s)
+# r = conn.execute(s)
+# print(r.fetchall())
+
+
+# Ограничение колонок. Ограничить количество полей, возвращаемых запросом можно, передав название полей в виде списка в функцию select()
+# s = select([items.c.name, items.c.quantity]).where(items.c.quantity == 50)
+# print(s)
+# r = conn.execute(s)
+# print(r.keys())
+# print(r.fetchall())
+
+
+# Внимание items.c.selling_price * 5 — это не реальная колонка, поэтому создается анонимное имя anon_1.
+# s = select([items.c.name, items.c.quantity, items.c.selling_price * 5]).where(items.c.quantity == 50)
+# print(s)
+# r = conn.execute(s)
+# print(r.keys())  # RMKeyView(['name', 'quantity', 'anon_1'])
+# print(r.fetchall())
+
+
+# Колонке или выражению можно присвоить метку с помощью метода label()
+# s = select([items.c.name, items.c.quantity, (items.c.selling_price * 5).label('price')]).where(items.c.quantity == 50)
+# print(s)
+# r = conn.execute(s)
+# print(r.keys())  # RMKeyView(['name', 'quantity', 'price'])
+# print(r.fetchall())
