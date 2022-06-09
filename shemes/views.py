@@ -3,6 +3,7 @@ from sqlalchemy import select
 from settings.settings import conn
 from shemes.models import customers, items, orders, order_lines
 
+
 # 1-ый Способ создания данных в БД
 # ins = customers.insert().values(
 #     first_name='Dmitriy',
@@ -370,3 +371,23 @@ from shemes.models import customers, items, orders, order_lines
 # r = conn.execute(s)
 # print(r.keys())  # RMKeyView(['name', 'quantity', 'price'])
 # print(r.fetchall())
+
+# s = select([
+#     orders.c.id.label('order_id'),
+#     orders.c.date_placed,
+#     order_lines.c.quantity,
+#     items.c.name,
+#
+# ]).select_from(
+#     orders.join(customers).join(order_lines).join(items)
+# ).where(
+#     and_(
+#         customers.c.first_name == "Dmitriy",
+#         customers.c.last_name == "Yatsenko",
+#     )
+# )
+#
+# print(s)
+# rs = conn.execute(s)
+# print(rs.keys())
+# print(rs.fetchall())

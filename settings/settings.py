@@ -5,3 +5,4 @@ from sqlalchemy import create_engine, MetaData
 
 engine = create_engine("postgresql+psycopg2://postgres:root@localhost/SQLAlchemy", echo=True)
 conn = engine.connect()
+

@@ -1,9 +1,10 @@
 from settings import settings
 
-from sqlalchemy import MetaData, Table, String, Integer, Column, Text, DateTime, Boolean, ForeignKey, Numeric, CheckConstraint
+from sqlalchemy import MetaData, Table, String, Integer, Column, Text, DateTime, Boolean, ForeignKey, Numeric, CheckConstraint, engine
 from datetime import datetime
 
 metadata = MetaData()
+# metadata.drop_all(engine)
 
 customers = Table('customers', metadata,
     Column('id', Integer(), primary_key=True),
