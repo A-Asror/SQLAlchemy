@@ -1,7 +1,7 @@
-from sqlalchemy import insert, and_, or_, not_, asc, desc
-from sqlalchemy import select
-from settings.settings import conn
-from shemes.models import customers, items, orders, order_lines
+# from sqlalchemy import insert, and_, or_, not_, asc, desc
+# from sqlalchemy import select
+# from settings.settings import conn
+# from shemes.models import customers, items, orders, order_lines
 
 
 # 1-ый Способ создания данных в БД
